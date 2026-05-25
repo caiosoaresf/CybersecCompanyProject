@@ -7,7 +7,7 @@ cursor = connection.cursor()
 
 cursor.execute("PRAGMA foreign_keys = ON;")
 
-#Can be removed if a persisting database is required
+#Can be removed if a permanent database is required
 cursor.execute("DROP TABLE IF EXISTS Devices")
 cursor.execute("DROP TABLE IF EXISTS Vulnerabilities")
 
@@ -31,7 +31,7 @@ CREATE TABLE Vulnerabilities(
     FOREIGN KEY(DeviceId) REFERENCES Devices(Id) ON DELETE CASCADE ON UPDATE NO ACTION);
 """)
 
-#Code to centralize main text
+#Align main text
 columns = shutil.get_terminal_size().columns
 
 #Main user interface
@@ -48,7 +48,7 @@ while True:
     print("""
 Do you already have devices registered in our system?
 Press "y" if you do
-Press "n" if you don't or want to register new devices
+Press "n" if you don't or want to register new devices/vulnerabilities
 Press "b" if you want to leave
     """)
 
@@ -83,22 +83,26 @@ Press 5 to return
                             id = int(input("\nInsert the ID of the device you would like to check or press '0' to leave:\n").strip())
                             cursor.execute("SELECT * FROM Devices WHERE Id = ? AND Type = ?" , (id,types[option]))
                             rows = cursor.fetchall()
-                            if rows:
+                            
+                            if (id == 0):
+                                break
+
+                            elif rows:
                                 for row in rows:
                                     print(row)
                             
                                 while True:
                                     choice = input("\nWould you like to check the vulnerabilities list too? (y/n):\n").strip().lower()
 
-                                    if (choice == "y"):
+                                    if (choice == "n"):
+                                        break
+
+                                    elif (choice == "y"):
                                         cursor.execute("SELECT * FROM Vulnerabilities WHERE DeviceId = ?", (id,))
                                         rows = cursor.fetchall()
                                         if rows:
                                             for row in rows:
                                                 print(row)
-
-                                    elif (choice == "n"):
-                                        break
 
                                     else:
                                         print("Invalid option")
@@ -125,6 +129,7 @@ Press "r" to return to device selection
                                             Type = types[NewType]
                                             if (NewType != option):
                                                 print("OBS device type was changed, after operations return to device selection to select the new type")
+                                        
                                         except ValueError:
                                             print("This is not a number")
                                             continue
@@ -136,18 +141,23 @@ Press "r" to return to device selection
 
                                         while True:
                                             choice = input("\nWould you like to update the vulnerabilities too? (y/n):\n").strip().lower()
-                                            if (choice == "y"):
+                                            
+                                            if(choice == "n"):
+                                                break
+                                            
+                                            elif (choice == "y"):
                                                 while True:
                                                     try:
                                                         VulnId = int(input("\nInsert the VulnId of the vulnerability you would like to change:\n").strip())
                                                         cursor.execute("SELECT 1 FROM Vulnerabilities WHERE VulnId = ?", (VulnId,))
+                                                        
                                                         if not cursor.fetchone():
                                                             print("VulnId doesn't exist, returning")
                                                             continue
 
                                                     except ValueError:
                                                         print("This is not a number, returning to vulnerability update")
-                                                        break
+                                                        continue
 
                                                     NewDescription = input("\nInsert the new description of the vulnerability: ")
                                                     NewCategory = input("Insert the new category of the vulnerability: ")
@@ -159,9 +169,7 @@ Press "r" to return to device selection
                                                     connection.commit()
                                                     print("Successfully updated the vulnerability")
                                                     break
-
-                                            elif(choice == "n"):
-                                                break
+                                            
                                             else:
                                                 print("Invalid option")
 
@@ -174,11 +182,10 @@ Press "r" to return to device selection
 
                                     else:
                                         print(("This option doesn't exist"))
-                                    
-                            elif (id == 0):
-                                break
+                            
                             else:
                                 print("Id not found")
+                        
                         except ValueError:
                             print("This is not a number")
                             continue
@@ -201,50 +208,98 @@ Press 5 to return
 
             try:
                 option = int(input().strip()) 
+                
                 if option == 5:
                     break
 
 #Implementation of Create
                 elif (option == 1 or option == 2 or option == 3 or option == 4):
                     
-                    Hostname = input("\nInsert the hostname of the device: ")
-                    InCharge = input("Insert who is in charge of the device: ")
-                    Sector = input("Insert the sector where the device is located: ")
-                    Type = types[option]
-
-                    query = "INSERT INTO Devices(Hostname,InCharge,Sector,Type) Values (?,?,?,?)"
-                    cursor.execute(query, (Hostname,InCharge,Sector,Type))
-                    connection.commit()
-                    cursor.execute("SELECT Id FROM Devices WHERE Type = ?", (types[option],))
-                    ID = cursor.fetchone()
-                    print(f"Successfully registered the Device with ID: {ID}")
-
                     while True:
-                        print("\nDoes the device have any vulnerability to be inserted? (y/n)\n")
+                        print("""
+What would you like to insert
+Press d for new device
+Press v for new vulnerability
+Press r to return
+                        """)
+
                         choice = input().strip().lower()
 
-                        if (choice == "n"):
+                        if (choice == "r"):
                             break
 
-                        elif (choice == "y"):
-                            GeneratedId = cursor.lastrowid
-                            Description = input("\nInsert the description of the vulnerability: ")
-                            Category = input("Insert the category of the vulnerability: ")
-                            Severity = input("Insert the severity of the vulnerability: ")
-                            Status = input("Insert the status of the vulnerability: ")
+                        elif (choice == "d"):
+                            Hostname = input("\nInsert the hostname of the device: ")
+                            InCharge = input("Insert who is in charge of the device: ")
+                            Sector = input("Insert the sector where the device is located: ")
+                            Type = types[option]
 
-                            query = "INSERT INTO Vulnerabilities(DeviceId,Description,Category,Severity,Status) VALUES (?,?,?,?,?)"
-                            cursor.execute(query, (GeneratedId,Description,Category,Severity,Status))
+                            query = "INSERT INTO Devices(Hostname,InCharge,Sector,Type) Values (?,?,?,?)"
+                            cursor.execute(query, (Hostname,InCharge,Sector,Type))
                             connection.commit()
-                            cursor.execute("SELECT VulnId FROM Vulnerabilities WHERE DeviceId = ?", (ID[0],))
-                            VulnID = cursor.fetchone()
-                            print(f"Successfully registered the vulnerability with VulnID {VulnID}")
-                        
+                            cursor.execute("SELECT Id FROM Devices WHERE Type = ?", (types[option],))
+                            ID = cursor.fetchone()
+                            print(f"Successfully registered the Device with ID: {ID}")
+
+                            while True:
+                                print("\nDoes the device have any vulnerability to be inserted? (y/n)\n")
+                                choice = input().strip().lower()
+
+                                if (choice == "n"):
+                                    break
+
+                                elif (choice == "y"):
+                                    GeneratedId = cursor.lastrowid
+                                    Description = input("\nInsert the description of the vulnerability: ")
+                                    Category = input("Insert the category of the vulnerability: ")
+                                    Severity = input("Insert the severity of the vulnerability: ")
+                                    Status = input("Insert the status of the vulnerability: ")
+
+                                    query = "INSERT INTO Vulnerabilities(DeviceId,Description,Category,Severity,Status) VALUES (?,?,?,?,?)"
+                                    cursor.execute(query, (GeneratedId,Description,Category,Severity,Status))
+                                    connection.commit()
+                                    cursor.execute("SELECT VulnId FROM Vulnerabilities WHERE DeviceId = ?", (ID[0],))
+                                    VulnID = cursor.fetchone()
+                                    print(f"Successfully registered the vulnerability with VulnID {VulnID}")
+                                
+                                else:
+                                    print("This option doesn't exist")
+                            
+                        elif (choice == "v"):
+                            try:
+                                id = int(input("\nInsert the ID of the device you would like to add a vulnerability or '0' to leave: \n").strip())
+                                cursor.execute("SELECT 1 FROM Devices WHERE Id = ?" , (id,))
+
+                                if (id == 0):
+                                    break
+
+                                if not cursor.fetchone():
+                                    print("ID doesn't exist, returning")
+                                    continue
+
+                                Description = input("\nInsert the description of the vulnerability: ")
+                                Category = input("Insert the category of the vulnerability: ")
+                                Severity = input("Insert the severity of the vulnerability: ")
+                                Status = input("Insert the status of the vulnerability: ")
+
+                                query = "INSERT INTO Vulnerabilities(DeviceId,Description,Category,Severity,Status) VALUES (?,?,?,?,?)"
+                                cursor.execute(query, (id,Description,Category,Severity,Status))
+                                connection.commit()
+                                cursor.execute("SELECT VulnId FROM Vulnerabilities WHERE DeviceId = ?", (id,))
+                                VulnID = cursor.lastrowid
+                                print(f"Successfully registered the vulnerability with VulnID {VulnID}")    
+
+                            except ValueError:
+                                print("This is not a number")
+                                continue
+
                         else:
                             print("This option doesn't exist")
                 else:
                     print("This option doesn't exist")
+
             except ValueError:
-                print("This is not a number")     
+                print("This is not a number")  
+
     else:
         print("Typing error")
