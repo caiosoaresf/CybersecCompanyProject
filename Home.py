@@ -61,11 +61,11 @@ Press "b" if you want to leave
         while True:
             print("""
 Which type of device would you like to check:
-Press 1 for Laptop
-Press 2 for Server
-Press 3 for Router
-Press 4 for Printer
-Press 5 to return
+Press "1" for Laptop
+Press "2" for Server
+Press "3" for Router
+Press "4" for Printer
+Press "5" to return
             """)
 
 #Implementation of dictionary since SQL makes them useless here
@@ -197,11 +197,11 @@ Press "r" to return to device selection
         while True:
             print("""
 Which type of device would you like to register:
-Press 1 for Laptop
-Press 2 for Server
-Press 3 for Router
-Press 4 for Printer
-Press 5 to return
+Press "1" for Laptop
+Press "2" for Server
+Press "3" for Router
+Press "4" for Printer
+Press "5" to return
             """)
 #Implementation of dictionary since SQL makes them useless here
             types = {1: "Laptop", 2: "Server", 3: "Router", 4: "Printer"}
@@ -218,9 +218,9 @@ Press 5 to return
                     while True:
                         print("""
 What would you like to insert
-Press d for new device
-Press v for new vulnerability
-Press r to return
+Press "d" for new device
+Press "v" for new vulnerability
+Press "r" to return
                         """)
 
                         choice = input().strip().lower()
@@ -267,7 +267,7 @@ Press r to return
                             
                         elif (choice == "v"):
                             try:
-                                id = int(input("\nInsert the ID of the device you would like to add a vulnerability or '0' to leave: \n").strip())
+                                id = int(input("\nInsert the ID of the device you would like to add a vulnerability or '0' to leave:\n").strip())
                                 cursor.execute("SELECT 1 FROM Devices WHERE Id = ?" , (id,))
 
                                 if (id == 0):
