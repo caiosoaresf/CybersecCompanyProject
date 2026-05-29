@@ -4,7 +4,6 @@ import shutil
 #Creating the Database
 connection = sqlite3.connect("Database.db")
 cursor = connection.cursor()
-
 cursor.execute("PRAGMA foreign_keys = ON;")
 
 #Can be removed if a permanent database is required
@@ -31,7 +30,6 @@ CREATE TABLE Vulnerabilities(
     FOREIGN KEY(DeviceId) REFERENCES Devices(Id) ON DELETE CASCADE ON UPDATE NO ACTION);
 """)
 
-#Align main text
 columns = shutil.get_terminal_size().columns
 
 #Main user interface
@@ -103,6 +101,8 @@ Press "5" to return
                                         if rows:
                                             for row in rows:
                                                 print(row)
+                                        else:
+                                            print("There are no vulnerabilites registered for this ID")
 
                                     else:
                                         print("Invalid option")
