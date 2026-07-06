@@ -35,6 +35,7 @@ class Database:
         self.connection.commit()
         ID = self.cursor.lastrowid
         print(f"Successfully registered the Device with ID: ({ID},)")
+        return ID
 
     def read(self, Id, Type):
         self.cursor.execute("SELECT * FROM Devices WHERE Id = ? AND Type = ?", (Id, Type))
@@ -297,7 +298,6 @@ Press "r" to return
                                     "Severity": Severity,
                                     "Status": Status
                                 })
-
                                 self.db.update(row[0], row[1], row[2], row[3], row[4], Vulns)
                                 print(f"Successfully registered the vulnerability with VulnID {len(Vulns)}")
 
